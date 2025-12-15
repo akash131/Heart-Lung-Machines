@@ -149,7 +149,8 @@ class TestHeartLungMachineController:
         controller.start_priming()
         controller.complete_priming()
         controller.start_bypass(4000)
-        # Set hypothermic temperature first
+        # Set hypothermic temperature first (update nasopharyngeal - prioritized by get_current_patient_temp)
+        controller.temperature_controller.update_temperature("nasopharyngeal", 28.0)
         controller.temperature_controller.update_temperature("arterial", 28.0)
         assert controller.start_rewarming(37.0) is True
 
@@ -338,7 +339,8 @@ class TestFullWorkflow:
         assert controller.start_bypass() is True
         assert controller.state == MachineState.ON_BYPASS
 
-        # 5. Cooling phase
+        # 5. Cooling phase (update nasopharyngeal - prioritized by get_current_patient_temp)
+        controller.temperature_controller.update_temperature("nasopharyngeal", 37.0)
         controller.temperature_controller.update_temperature("arterial", 37.0)
         assert controller.start_cooling(28.0) is True
 
@@ -350,10 +352,11 @@ class TestFullWorkflow:
             venous_pressure=-15,
             pre_oxy_pressure=200,
             post_oxy_pressure=180,
-            temperature_readings={"arterial": 32.0}
+            temperature_readings={"arterial": 32.0, "nasopharyngeal": 30.0}
         )
 
-        # 7. Rewarming phase
+        # 7. Rewarming phase (update nasopharyngeal - prioritized by get_current_patient_temp)
+        controller.temperature_controller.update_temperature("nasopharyngeal", 28.0)
         controller.temperature_controller.update_temperature("arterial", 28.0)
         assert controller.start_rewarming(37.0) is True
 

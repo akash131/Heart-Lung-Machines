@@ -168,6 +168,8 @@ class TestTemperatureController:
 
     def test_start_rewarming(self):
         tc = TemperatureController()
+        # Update nasopharyngeal (prioritized by get_current_patient_temp)
+        tc.update_temperature("nasopharyngeal", 28.0)  # Hypothermic
         tc.update_temperature("arterial", 28.0)  # Hypothermic
         assert tc.start_rewarming(37.0) is True
         assert tc.mode == TemperatureMode.REWARMING
@@ -184,9 +186,10 @@ class TestTemperatureController:
     def test_is_at_target(self):
         tc = TemperatureController()
         tc.target_patient_temp_celsius = 37.0
-        tc.update_temperature("arterial", 37.2)
+        # Update nasopharyngeal (prioritized by get_current_patient_temp)
+        tc.update_temperature("nasopharyngeal", 37.2)
         assert tc.is_at_target(tolerance_celsius=0.5) is True
-        tc.update_temperature("arterial", 35.0)
+        tc.update_temperature("nasopharyngeal", 35.0)
         assert tc.is_at_target(tolerance_celsius=0.5) is False
 
     def test_check_gradients(self):

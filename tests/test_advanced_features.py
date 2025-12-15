@@ -333,7 +333,8 @@ class TestGoalDirectedPerfusion:
     def test_goal_status(self):
         gdp = GoalDirectedPerfusion()
         gdp.activate()
-        gdp.update_state(do2_index=350)
+        # Use value within 10% tolerance (target=300, tolerance=10%)
+        gdp.update_state(do2_index=320)  # 6.67% above target
         assert gdp.protocol.goals["do2_index"].status == GoalStatus.MET
 
     def test_compliance_score(self):
@@ -373,7 +374,8 @@ class TestStandardProtocol:
     def test_goal_update(self):
         protocol = StandardAdultProtocol()
         protocol.activate()
-        status = protocol.update_goal("do2_index", 350)
+        # Use value within 10% tolerance (target=300, tolerance=10%)
+        status = protocol.update_goal("do2_index", 320)  # 6.67% above target
         assert status == GoalStatus.MET
 
     def test_unmet_goals(self):

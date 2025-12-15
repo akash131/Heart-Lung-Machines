@@ -97,6 +97,9 @@ class HeartLungMachineController:
         # Event log
         self.event_log: list[dict] = []
 
+        # Guard flag for re-entrant emergency handling
+        self._handling_emergency: bool = False
+
         # Wire up callbacks between subsystems
         self._connect_subsystems()
 
@@ -433,21 +436,29 @@ class HeartLungMachineController:
 
     def _handle_emergency(self, reason: str) -> None:
         """Handle emergency situation."""
-        self.bypass_circuit.emergency_stop()
-        self.bubble_system.clamp_line("arterial")
-        self.state = MachineState.EMERGENCY
+        # Guard against re-entrant calls (breaks callback recursion)
+        if self._handling_emergency:
+            return
+        self._handling_emergency = True
 
-        self.safety_monitor.create_alarm(
-            level=AlarmLevel.CRITICAL,
-            category=AlarmCategory.SYSTEM,
-            message=f"EMERGENCY STOP: {reason}",
-            source="controller"
-        )
+        try:
+            self.bypass_circuit.emergency_stop()
+            self.bubble_system.clamp_line("arterial")
+            self.state = MachineState.EMERGENCY
 
-        self._log_event(
-            "EMERGENCY",
-            f"Emergency stop executed: {reason}"
-        )
+            self.safety_monitor.create_alarm(
+                level=AlarmLevel.CRITICAL,
+                category=AlarmCategory.SYSTEM,
+                message=f"EMERGENCY STOP: {reason}",
+                source="controller"
+            )
+
+            self._log_event(
+                "EMERGENCY",
+                f"Emergency stop executed: {reason}"
+            )
+        finally:
+            self._handling_emergency = False
 
     def recover_from_emergency(self) -> bool:
         """Attempt to recover from emergency state."""
