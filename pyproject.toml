@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "heart-lung-machines"
-version = "1.0.0"
-description = "Cardiopulmonary bypass system with bubble detection and temperature management"
+version = "2.0.0"
+description = "Comprehensive cardiopulmonary bypass system with vendor-parity features including bypass circuit management, bubble detection, temperature control, cardioplegia delivery, blood gas monitoring, goal-directed perfusion, HL7 integration, and full audit/compliance support"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
@@ -27,6 +27,17 @@ dependencies = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+]
+hl7 = [
+    "hl7>=0.4.0",
+]
+serial = [
+    "pyserial>=3.5",
+]
+full = [
+    "numpy>=1.24.0",
+    "hl7>=0.4.0",
+    "pyserial>=3.5",
 ]
 
 [tool.pytest.ini_options]
